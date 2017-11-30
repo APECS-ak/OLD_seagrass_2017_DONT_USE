@@ -1,0 +1,61 @@
+---
+title: "Data cleaning and preparation"
+author: "Wendel Raymond"
+date: "November 29, 2017"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r Libraries, echo = FALSE, include=FALSE}
+library(dplyr)
+library(ggplot2)
+```
+
+
+# Data cleaning and preparation
+Below is are the steps and rational for cleaning and prepping raw data so that it is ready for analysis. Data are from the 2017 field season sampling eelgrass sites on Prince of Wales Island Alaska.
+
+## Raw Data
+Raw data include data collected in the field on the eelgrass transect (eg.tran), data collected from processing eelgrass samples collected in the field (eg.bio). This can be thought of as the eelgrass biometrics. And finaly site level data such as date, site name, temperature, salinity, etc (eg.site).
+
+```{r import data, echo = FALSE, include = FALSE}
+# Eelgrass Transect
+eg.tran <- read.csv("Data/Eelgrass_Transect_data_2017_19Oct2017_WR.csv", stringsAsFactors = FALSE, header = TRUE)
+
+# Eelgrass Biometrics (lab data)
+eg.bio <- read.csv("Data/Eelgrass_Biometrics_data_2017_29Nov2017_WR_FINAL.csv", stringsAsFactors = FALSE, header = TRUE)
+
+# Eelgrass Site
+eg.site <- read.csv("Data/Eelgrass_Site_data_2017_20Oct2017_WR.csv", stringsAsFactors = FALSE, header = TRUE)
+```
+
+Here are our data.
+Eelgrass Transect
+```{r str eg.tran, echo=FALSE}
+str(eg.tran)
+```
+
+Eelgrass biometrics - the lab data
+```{r str eg.bio, echo=FALSE}
+str(eg.bio)
+```
+
+Eelgrass Site
+```{r str eg.site, echo=FALSE}
+str(eg.site)
+```
+
+
+## Cleaning missing values
+A few times when processing samples either a grazer was lost or the grazer was so small that it did not register a mass on the scale. In these instances we want to still account for the animal but we need to fill in a value for the foil masses. 
+
+If a grazer column has a count but has NA for foil weights then we will fill in dummy values for the foil masses so that the grazer mass is equal to 0.0001 grams, the smalles amount measurable by the scale
+```{r}
+if(eg.bio$plant == 1 && eg.bio$iso_count > 0 | eg.bio$gamm_amph_count > 0| eg.bio$caprel_count > 0 | eg.bio$limpet_count > 0 | eg.bio$gastropod_count > 0 | eg.bio$crab_count > 0 && is.na(eg.bio$iso_fw) | is.na(eg.bio$gamm_amph_fw) | is.na(eg.bio$caprel_fw) | is.na(eg.bio$limpet_fw) | is.na(eg.bio$gastropod_fw) | is.na(eg.bio$crab_fw))
+{
+   Code to execute
+}
+  
+```
+
