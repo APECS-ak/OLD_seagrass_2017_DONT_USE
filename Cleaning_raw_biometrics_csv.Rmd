@@ -13,14 +13,14 @@ theme_set(theme_classic())
 
 Import data
 ```{r}
-# datachunk creator: TAS
+# datachunk: TAS
 
 sg.bio <- read.csv("https://raw.githubusercontent.com/APECS-ak/seagrass_2017/master/RAW_seagrass_biometrics_2017.csv", stringsAsFactors = FALSE, header = TRUE)
 ```
 
 # Checking the data
 ```{r}
-# datachunk creator: WR
+# datachunk: WR
 
 str(sg.bio)
 range(sg.bio$rhi_length, na.rm = TRUE)
@@ -32,10 +32,10 @@ hist(sg.bio$leaf_width1)
 Change numerics to factors
 # Is this necessary? 
 ```{r}
-# datachunk creator: WR
+# datachunk: WR
 
-sg.bio$quadrat <- as.factor(sg.bio$quadrat)
-sg.bio$plant <- as.factor(sg.bio$plant)
+#sg.bio$quadrat <- as.factor(sg.bio$quadrat)
+#sg.bio$plant <- as.factor(sg.bio$plant)
 ```
 
 
@@ -44,7 +44,7 @@ sg.bio$plant <- as.factor(sg.bio$plant)
 
 Calculate dry weights of all flora and fauna; remove pad + foil data uneccessary for analysis
 ```{r}
-# datachunk creator: TAS
+# datachunk: TAS
 
 
 # piped calculations for all
@@ -78,7 +78,7 @@ colnames(sg.bio)
 
 Calculate leaf areas for each blade measured
 ```{r, echo=FALSE}
-# datachunk creator: TAS
+# datachunk: TAS
 
 
 # calculate the leaf area (cm^2) per blade per plant
@@ -100,7 +100,7 @@ colnames(sg.bio)
 
 Calculate total leaf area for each plant
 ```{r}
-# datachunk creator: TAS
+# datachunk: TAS
 
 
 # calculate total leaf area per plant (there is no biomass data per blade so need to combine all blades)
@@ -112,7 +112,7 @@ colnames(sg.bio)
 
 Calculate mean canopy height (all blades from each plant included)
 ```{r}
-# datachunk creator: TAS
+# datachunk: TAS
 
 
 # mean height of all blades
@@ -124,7 +124,7 @@ colnames(sg.bio)
 
 Determine max canopy height per plant (only tallest blade from each plant included)
 ```{r, warning = FALSE, message = FALSE}
-# datachunk creator: TAS
+# datachunk: TAS
 
 sg.bio$max_canopy_height = apply(sg.bio[, 12:21], 1, max, na.rm = TRUE)
 
@@ -134,6 +134,29 @@ colnames(sg.bio)
 ```{r}
 #write.csv(eg.bio,'CLEAN_seagrass_biometrics_2017.csv')
 ```
+
+
+
+```{r}
+# datachunk: TAS 
+
+library(DT) 
+
+sg.bio = sg.bio %>%
+  separate(collection_date, c("Day", "Month", "Year"), sep = "/")
+
+ggplot(sg.bio, aes(site, mean_leaf_length)) +
+  geom_col() +
+  coord_flip() +
+  facet_wrap(~Month)
+
+
+```
+
+
+
+
+
 
 
 
