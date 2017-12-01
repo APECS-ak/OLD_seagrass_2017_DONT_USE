@@ -115,7 +115,7 @@ Calculate mean canopy height (all blades from each plant included)
 
 
 # mean height of all blades
-eg.bio = mutate(eg.bio, mean_canopy_height = rowMeans(select(eg.bio, starts_with("leaf_length")), na.rm = TRUE))
+eg.bio = mutate(eg.bio, mean_leaf_length = rowMeans(select(eg.bio, starts_with("leaf_length")), na.rm = TRUE))
 
 # check new column names
 colnames(eg.bio)
@@ -130,6 +130,9 @@ eg.bio$max_canopy_height = apply(eg.bio[, 12:21], 1, max, na.rm = TRUE)
 colnames(eg.bio)
 ```
 
+```{r}
+write.csv(eg.bio,'CLEAN_seagrass_biometrics_2017.csv')
+```
 
 
 
