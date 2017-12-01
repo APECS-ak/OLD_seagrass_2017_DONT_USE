@@ -65,14 +65,14 @@ sg.bio = sg.bio %>%
 colnames(sg.bio)
 
 # remove pad and foil weights from dataframe 
-sg.bio = sg.bio %>% 
-  select(-pad_epiphyte_mass_g, -pad_mass_g, -xs_epiphyte_pad_mass_g, -xs_pad_mass_g) %>% #pads
-  select(-rhi_foil_dw_g, -rhi_foil, -shoot_foil, -shoot_foil_dw, -xs_shoot_foil_dw, -xs_shoot_foil) %>% #seagrass
-  select(-iso_foil_dw, -iso_foil, -gamm_amph_foil_dw, -gamm_amph_foil, -caprel_foil_dw, -caprel_foil, -crab_foil_dw, -crab_foil) %>% #crustaceans
-  select(-limpet_foil_dw, -limpet_foil, -gastropod_foil_dw, -gastropod_foil) #molluscs
+#sg.bio = sg.bio %>% 
+ #select(-pad_epiphyte_mass_g, -pad_mass_g, -xs_epiphyte_pad_mass_g, -xs_pad_mass_g) %>% #pads
+  #select(-rhi_foil_dw_g, -rhi_foil, -shoot_foil, -shoot_foil_dw, -xs_shoot_foil_dw, -xs_shoot_foil) %>% #seagrass
+  #select(-iso_foil_dw, -iso_foil, -gamm_amph_foil_dw, -gamm_amph_foil, -caprel_foil_dw, -caprel_foil, -crab_foil_dw, -crab_foil) %>% #crustaceans
+  #select(-limpet_foil_dw, -limpet_foil, -gastropod_foil_dw, -gastropod_foil) #molluscs
 
 # check new column names
-colnames(sg.bio)
+#colnames(sg.bio)
 ```
 
 
@@ -153,6 +153,11 @@ ggplot(sg.bio, aes(site, mean_leaf_length)) +
 
 ```
 
+
+```{r}
+
+ggplot(sg.bio = aes())
+```
 
 
 
