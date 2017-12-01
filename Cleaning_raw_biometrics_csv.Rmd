@@ -122,12 +122,12 @@ colnames(eg.bio)
 ```
 
 Determine max canopy height per plant (only tallest blade from each plant included)
-```{r}
+```{r, warning = FALSE, message = FALSE}
 # datachunk creator: TAS
 
 eg.bio$max_canopy_height = apply(eg.bio[, 12:21], 1, max, na.rm = TRUE)
 
-
+colnames(eg.bio)
 ```
 
 
