@@ -8,7 +8,8 @@ editor_options:
 ---
 
 ```{r Libraries, echo = FALSE, include=FALSE}
-library(dplyr); library(ggplot2)
+library(dplyr); library(tidyr); library(ggplot2)
+theme_set(theme_classic())
 ```
 
 
@@ -19,30 +20,39 @@ Data are from the 2017 field season sampling eelgrass sites on Prince of Wales I
 ## Raw Data
 Raw data include data collected in the field on the eelgrass transect (eg.tran), data collected from processing eelgrass samples collected in the field (eg. bio). This can be thought of as the eelgrass biometrics. And finally site level data such as date, site name, temperature, salinity, etc (eg.site).
 
-```{r import data, echo = FALSE, include = FALSE}
-# Eelgrass Transect
-eg.tran <- read.csv("Data/Eelgrass_Transect_data_2017_19Oct2017_WR.csv", stringsAsFactors = FALSE, header = TRUE)
+```{r import data, cache = TRUE, echo = FALSE, include = FALSE}
+# seagrass transect
+eg.tran <- read.csv("https://raw.githubusercontent.com/APECS-ak/seagrass_2017/master/RAW_seagrass_transect_2017.csv", stringsAsFactors = FALSE, header = TRUE)
 
-# Eelgrass Biometrics (lab data)
-eg.bio <- read.csv("Data/Eelgrass_Biometrics_data_2017_29Nov2017_WR_FINAL.csv", stringsAsFactors = FALSE, header = TRUE)
+# seagrass biometrics (lab data)
+eg.bio <- read.csv("https://raw.githubusercontent.com/APECS-ak/seagrass_2017/master/RAW_seagrass_biometrics_2017.csv", stringsAsFactors = FALSE, header = TRUE)
 
-# Eelgrass Site
-eg.site <- read.csv("Data/Eelgrass_Site_data_2017_20Oct2017_WR.csv", stringsAsFactors = FALSE, header = TRUE)
+# seagrass site
+eg.site <- read.csv("https://raw.githubusercontent.com/APECS-ak/seagrass_2017/master/RAW_seagrass_site_2017.csv", stringsAsFactors = FALSE, header = TRUE)
 ```
 
 Here are our data.
 Eelgrass Transect
 ```{r str eg.tran, echo=FALSE}
+# datachunk creator: WR
+
+
 str(eg.tran)
 ```
 
 Eelgrass biometrics - the lab data
 ```{r str eg.bio, echo=FALSE}
+# datachunk creator: WR
+
+
 str(eg.bio)
 ```
 
 Eelgrass Site
 ```{r str eg.site, echo=FALSE}
+# datachunk creator: WR
+
+
 str(eg.site)
 ```
 
@@ -51,11 +61,360 @@ str(eg.site)
 A few times when processing samples either a grazer was lost or the grazer was so small that it did not register a mass on the scale. In these instances we want to still account for the animal but we need to fill in a value for the foil masses. 
 
 If a grazer column has a count but has NA for foil weights then we will fill in dummy values for the foil masses so that the grazer mass is equal to 0.0001 grams, the smalles amount measurable by the scale
+# This is disabled for now, code not functional
 ```{r}
-if(eg.bio$plant == 1 && eg.bio$iso_count > 0 | eg.bio$gamm_amph_count > 0| eg.bio$caprel_count > 0 | eg.bio$limpet_count > 0 | eg.bio$gastropod_count > 0 | eg.bio$crab_count > 0 && is.na(eg.bio$iso_fw) | is.na(eg.bio$gamm_amph_fw) | is.na(eg.bio$caprel_fw) | is.na(eg.bio$limpet_fw) | is.na(eg.bio$gastropod_fw) | is.na(eg.bio$crab_fw))
-{
-   Code to execute
-}
+# datachunk creator: WR
+
+####### Wendel, this code doesn't seem to work. Not sure where "plant" is derived from in line 57. #####
+
+#if(eg.bio$plant == 1 && eg.bio$iso_count > 0 | eg.bio$gamm_amph_count > 0| eg.bio$caprel_count > 0 | eg.bio$limpet_count > 0 | eg.bio$gastropod_count > 0 | eg.bio$crab_count > 0 && is.na(eg.bio$iso_fw) | is.na(eg.bio$gamm_amph_fw) | is.na(eg.bio$caprel_fw) | is.na(eg.bio$limpet_fw) | is.na(eg.bio$gastropod_fw) | is.na(eg.bio$crab_fw))
+#{
+   #Code to execute
+#}
   
+```
+
+
+
+# Data Exploration, Initial Prep, and Summaries
+### Originally created 10.19.2017; Wendel Raymond
+### Collaborating modifications after github import on 30 Nov 2017; Tiff Stephens
+
+
+
+Checking the data
+```{r}
+# datachunk creator: WR
+
+
+### Eelgrass Transect ###
+str(eg.tran)
+levels(eg.tran$site)
+levels(eg.tran$primary_obeserver)
+levels(eg.tran$secondary_observer)
+range(eg.tran$quadrat)
+range(eg.tran$macroalgae_cover_0.25msq)
+range(eg.tran$eelgrass_shoots_0.25msq)
+hist(eg.tran$eelgrass_shoots_0.25msq)
+hist(eg.tran$macroalgae_cover_0.25msq)
+hist(eg.tran$diatom_cover_0.25msq)
+
+### Eelgrass Biometrics ###
+str(eg.bio)
+range(eg.bio$rhi_length, na.rm = TRUE)
+range(eg.bio$node1, na.rm = TRUE)
+hist(eg.bio$node2)
+hist(eg.bio$leaf_width1)
+```
+
+
+Changing numerics to factors
+```{r}
+# datachunk creator: WR
+
+
+## Biometrics ##
+eg.bio$quadrat <- as.factor(eg.bio$quadrat)
+eg.bio$plant <- as.factor(eg.bio$plant)
+
+## Transect ##
+eg.tran$quadrat <- as.factor(eg.tran$quadrat)
+```
+
+
+Changing a few column names so its not confusing ###
+```{r}
+# datachunk creator: WR
+
+
+## Start and End times ##
+# Site
+colnames(eg.site)[6] <- "site_start_time"
+colnames(eg.site)[7] <- "site_end_time"
+
+# Transect
+colnames(eg.tran)[6] <- "transect_start_time"
+colnames(eg.tran)[7] <- "transect_end_time"
+
+```
+
+
+
+# Cleaning biometrics data for analysis
+
+Calculate dry weights of all flora and fauna; remove pad + foil data uneccessary for analysis
+```{r}
+# datachunk creator: TAS
+
+
+# piped calculations for all
+eg.bio = eg.bio %>% 
+  mutate(epiphyte_mass_dw = pad_epiphyte_mass_g - pad_mass_g) %>%
+  mutate(rhi_mass_dw = rhi_foil_dw_g - rhi_foil) %>%
+  mutate(shoot_mass_dw = shoot_foil_dw - shoot_foil) %>%
+  mutate(xs_shoot_mass_dw = xs_shoot_foil_dw - xs_shoot_foil) %>%
+  mutate(xs_pad_mass_dw = xs_epiphyte_pad_mass_g - xs_pad_mass_g) %>%
+  mutate(iso_mass_dw = iso_foil_dw - iso_foil) %>%
+  mutate(gamm_amph_mass_dw = gamm_amph_foil_dw - gamm_amph_foil) %>%
+  mutate(caprel_mass_dw = caprel_foil_dw - caprel_foil) %>%
+  mutate(limpet_mass_dw = limpet_foil_dw - limpet_foil) %>%
+  mutate(gastropod_mass_dw = gastropod_foil_dw - gastropod_foil) %>%
+  mutate(crab_mass_dw = crab_foil_dw - crab_foil) 
+
+# check new column names
+colnames(eg.bio)
+
+# remove pad and foil weights from dataframe 
+eg.bio = eg.bio %>% 
+  select(-pad_epiphyte_mass_g, -pad_mass_g, -xs_epiphyte_pad_mass_g, -xs_pad_mass_g) %>% #pads
+  select(-rhi_foil_dw_g, -rhi_foil, -shoot_foil, -shoot_foil_dw, -xs_shoot_foil_dw, -xs_shoot_foil) %>% #seagrass
+  select(-iso_foil_dw, -iso_foil, -gamm_amph_foil_dw, -gamm_amph_foil, -caprel_foil_dw, -caprel_foil, -crab_foil_dw, -crab_foil) %>% #crustaceans
+  select(-limpet_foil_dw, -limpet_foil, -gastropod_foil_dw, -gastropod_foil) #molluscs
+
+# check new column names
+colnames(eg.bio)
+```
+
+
+Calculate blade areas for each blade measured
+```{r, echo=FALSE}
+# datachunk creator: TAS
+
+
+# calculate the leaf area (cm^2) per blade per plant
+eg.bio = eg.bio %>% 
+  mutate((leaf_area1 = leaf_length1 * leaf_width1, na.rm = TRUE)
+         (leaf_area2 = leaf_length2 * leaf_width2, na.rm = TRUE)
+         (leaf_area3 = leaf_length3 * leaf_width3, na.rm = TRUE)
+         (leaf_area4 = leaf_length4 * leaf_width4, na.rm = TRUE)
+         (leaf_area5 = leaf_length5 * leaf_width5, na.rm = TRUE)
+         (leaf_area6 = leaf_length6 * leaf_width6, na.rm = TRUE)
+         (leaf_area7 = leaf_length7 * leaf_width7, na.rm = TRUE)
+         (leaf_area8 = leaf_length8 * leaf_width8, na.rm = TRUE)
+         (leaf_area9 = leaf_length9 * leaf_width9, na.rm = TRUE)
+         (leaf_area10 = leaf_length10 * leaf_width10, na.rm = TRUE)
+
+# check new column names
+colnames(eg.bio)
+```
+
+Calculate total leaf area for each plant
+```{r}
+# datachunk creator: TAS
+
+
+# calculate total leaf area per plant (there is no biomass data per blade so need to combine all blades)
+eg.bio$tot_leaf_area <- rowSums(eg.bio[,c("leaf_area1", "leaf_area2", "leaf_area3", "leaf_area4", "leaf_area5", "leaf_area6", "leaf_area7", "leaf_area8", "leaf_area9", "leaf_area10")], na.rm = TRUE)
+
+# check new column names
+colnames(eg.bio)
+```
+
+Calculate mean max canopy height, and mean canopy
+```{r}
+# datachunk creator: TAS
+
+
+# mean height of all blades by row
+eg.bio = mutate(eg.bio, mean_canopy_height = rowMeans(select(eg.bio, starts_with("leaf_length")), na.rm = TRUE))
+
+# check new column names
+colnames(eg.bio)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Cleaning up dates
+# Disabled, effort not working
+```{r}
+
+#####----- Calculations -----#####
+
+
+
+
+## Fill absent grazers with 0s so that cacluations below will work ##
+eg.bio[,89:94][is.na(eg.bio[,89:94])] <- 0
+
+## Crustacean Grazers Mass ##
+eg.bio$crust_mass <- (eg.bio$iso_mass + eg.bio$gamm_mass +  eg.bio$caprel_mass + eg.bio$crab_mass)
+
+## Gastropod Grazers Mass ##
+eg.bio$gastro_mass <- (eg.bio$limp_mass + eg.bio$gast_mass)
+
+## Total Grazer Mass ##
+eg.bio$graz_massT <- rowSums(eg.bio[, 89:94], na.rm = TRUE)
+
+#####----- Quadrat level Summaries -----#####
+## standard error of the mean fucntion to use later ##
+st.er <- function(x, na.rm = TRUE) {
+  stopifnot(is.numeric(x))
+  return(sd(x, na.rm = na.rm)/sqrt(length(x)))
+}
+
+## Convert Transect data to per meter ##
+eg.tran$eelgrass_shoots_msq <- (4 * eg.tran$eelgrass_shoots_0.25msq)
+eg.tran$flowering_shoots_msq <- (4 * eg.tran$flowering_shoots_0.25msq)
+eg.tran$macroalgae_cover_msq <- (1 * eg.tran$macroalgae_cover_0.25msq)
+eg.tran$diatom_cover_msq <- (1 * eg.tran$diatom_cover_0.25msq)
+
+## Biometrics data summarized by site and quadrat - shoots and rhizomes ##
+quad.bio <- data.frame(
+  eg.bio %>% 
+    group_by(site, quadrat) %>% 
+    summarise(s_shoot_area = mean(leaf_areaT, na.rm = TRUE),
+              s_epi_mass = mean(epi_mass, na.rm = TRUE),
+              s_shoot_mass = mean(shoot_mass, na.rm = TRUE),
+              s_rhi_mass = mean(rhi_mass, na.rm = TRUE),
+              s_node1 = mean(node1, na.rm = TRUE),
+              s_node2 = mean(node2, na.rm = TRUE),
+              s_node3 = mean(node3, na.rm = TRUE),
+              s_node4 = mean(node4, na.rm = TRUE),
+              s_node5 = mean(node5, na.rm = TRUE),
+              s_exshoot_mass = mean(exshoot_mass, na.rm = TRUE),
+              s_exepi_mass = mean(exepi_mass, na.rm = TRUE))
+)
+
+# Extract Grazer biomasses
+quad.graz <- data.frame(eg.bio[eg.bio$plant == 1,]) # extract just plant 1 which has all the grazer data
+quad.graz <- quad.graz[order(quad.graz[,1], quad.graz[,4]),] # order so that it matches everything else
+quad.graz <- data.frame(quad.graz[,c(1, 4, 89:97)]) # reduce to get grazer data only
+quad.graz[is.na(quad.graz)] <- 0 # turn NAs to 0s becasue if we sampled everything so if it was not there its a 0
+
+## Combined Transect and Biometrics data to give site summaries ##
+site.quad <- merge(eg.site[,c(1, 2)], eg.tran, by = "site")
+site.quad <- merge(site.quad, quad.bio, by = c("site", "quadrat"))
+site.quad <- merge(site.quad, quad.graz, by = c("site", "quadrat"))
+
+### Quadrat level caclulations ###
+## Aboveground Biomass ##
+site.quad$ag_mass <- (site.quad$eelgrass_shoots_msq * site.quad$s_shoot_mass)
+
+## Below Ground Biomass ##
+site.quad$bg_mass <- (site.quad$eelgrass_shoots_msq * site.quad$s_rhi_mass)
+
+## Epiphytes per eeglrass area ##
+site.quad$epimass_shootarea <- (site.quad$s_epi_mass / site.quad$s_shoot_area)
+
+## Epiphytes per eelgrass mass ##
+site.quad$epimass_shootmass <- (site.quad$s_epi_mass / site.quad$s_shoot_mass)
+
+## Grazer Mass per Quadrat ##
+# this is just equal to graz_massT
+
+## Grazer mass per eelgrass mass ##
+site.quad$grazmass_shootmass <- (site.quad$graz_massT / (site.quad$s_shoot_mass + site.quad$s_exshoot_mass))
+
+## Crustacean mass per eelgrass mass ##
+site.quad$crustmass_shootmass <- (site.quad$crust_mass / (site.quad$s_shoot_mass + site.quad$s_exshoot_mass))
+
+## Gastropod mass per eelgrass mass ##
+site.quad$gastromass_shootmass <- (site.quad$gastro_mass / (site.quad$s_shoot_mass + site.quad$s_exshoot_mass)) 
+
+#####----- Master Compile and Calculations -----#####
+### Site Level Data ###
+tran.dat <- data.frame(rbind(eg.tran[1, c(1, 4:8)], eg.tran[9, c(1, 4:8)], eg.tran[17, c(1, 4:8)], eg.tran[25, c(1, 4:8)], eg.tran[33, c(1, 4:8)], eg.tran[41, c(1, 4:8)], 
+                             eg.tran[49, c(1, 4:8)],eg.tran[57, c(1, 4:8)], eg.tran[65, c(1, 4:8)], eg.tran[73, c(1, 4:8)], eg.tran[81, c(1, 4:8)], eg.tran[89, c(1, 4:8)], 
+                             eg.tran[97, c(1, 4:8)], eg.tran[105, c(1, 4:8)], eg.tran[113, c(1, 4:8)], eg.tran[121, c(1, 4:8)], eg.tran[129, c(1, 4:8)], eg.tran[137, c(1, 4:8)], 
+                             eg.tran[145, c(1, 4:8)], eg.tran[153, c(1, 4:8)], eg.tran[161, c(1, 4:8)]))
+
+### Master ###
+dat <- data.frame(cbind(eg.site[, c(1:3, 32, 4:9)], tran.dat[, 2:5], so.index[, 6:13], eg.site[, 14:26]))
+
+## Transect data summarized by site ##
+site.tran <- data.frame(
+  eg.tran %>% 
+    group_by(site) %>% 
+    summarise(shoot_dens = (mean(eelgrass_shoots_0.25msq * 4)),
+              shoot_dens_se = (st.er(eelgrass_shoots_0.25msq * 4)),
+              macro_dens = (mean(macroalgae_cover_0.25msq * 1)),
+              macro_dens_se = (st.er(macroalgae_cover_0.25msq * 1)),
+              diatom_dens = (mean(diatom_cover_0.25msq * 1)),
+              diatom_dens_se = (st.er(diatom_cover_0.25msq * 1)),
+              flower_dens = (mean(flowering_shoots_0.25msq * 4)),
+              flower_dens_se = (st.er(flowering_shoots_0.25msq * 4)))
+)
+
+## Biometrics data summarized by site ##
+site.bio <- data.frame(
+  site.quad %>% 
+    group_by(site) %>% 
+    summarise(shoot_area = (mean(s_shoot_area, na.rm = TRUE)),
+              shoot_area_se = (st.er(s_shoot_area)),
+              epi_mass = (mean(s_epi_mass, na.rm = TRUE)),
+              epi_mass_se = (st.er(s_epi_mass)),
+              shoot_mass = (mean(s_shoot_mass, na.rm = TRUE)),
+              shoot_mass_se = (st.er(s_shoot_mass)),
+              rhi_mass = (mean(s_rhi_mass, na.rm = TRUE)),
+              rhi_mass_se = (st.er(s_rhi_mass)),
+              node1 = (mean(s_node1, na.rm = TRUE)),
+              node1_se = (st.er(s_node1)),
+              node2 = (mean(s_node2, na.rm = TRUE)),
+              node2_se = (st.er(s_node2)),
+              node3 = (mean(s_node3, na.rm = TRUE)),
+              node3_se = (st.er(s_node3)),
+              node4 = (mean(s_node4, na.rm = TRUE)),
+              node4_se = (st.er(s_node4)),
+              node5 = (mean(s_node5, na.rm = TRUE)),
+              node5_se = (st.er(s_node5)),
+              exshoot_mass = (mean(s_exshoot_mass, na.rm = TRUE)),
+              exshoot_mass_se = (st.er(s_exshoot_mass)),
+              exepi_mass = (mean(s_exepi_mass, na.rm = TRUE)),
+              exepi_mass_se = (st.er(s_exepi_mass)),
+              abvgnd_mass = (mean(ag_mass, na.rm = TRUE)),
+              abvgnd_mass_se = (st.er(ag_mass)),
+              blwgnd_mass = (mean(bg_mass, na.rm = TRUE)),
+              blwgnd_mass_se = (st.er(bg_mass)),
+              epiphmass_shootarea = (mean(epimass_shootarea, na.rm = TRUE)),
+              epiphmass_shootarea_se = (st.er(epimass_shootarea)),
+              epiphmass_shootmass = (mean(epimass_shootmass, na.rm = TRUE)),
+              epiphmass_shootmass_se = (st.er(epimass_shootmass)),
+              grazer_mass = (mean(graz_massT, na.rm = TRUE)),
+              grazer_mass_se = (st.er(graz_massT)),
+              crus_mass = (mean(crust_mass, na.rm = TRUE)),
+              crus_mass_se = (st.er(crust_mass)),
+              gast_mass = (mean(gastro_mass, na.rm = TRUE)),
+              gast_mass_se = (st.er(gastro_mass)),
+              grazermass_shootmass = (mean(grazmass_shootmass, na.rm = TRUE)),
+              grazermass_shootmass_se = (st.er(grazmass_shootmass)),
+              crusmass_shootmass = (mean(crustmass_shootmass, na.rm = TRUE)),
+              crusmass_shootmass_se = (st.er(crustmass_shootmass)),
+              gastmass_shootmass = (mean(gastromass_shootmass, na.rm = TRUE)),
+              gastmass_shootmass_se = (st.er(gastromass_shootmass)))
+)
+
+### Merge Transect and Biometrics data to Master dat ###
+## Transect ##
+dat <- merge(dat, site.tran, by = "site")
+
+## Biometrics ##
+dat <- merge(dat, site.bio, by = "site")
+
+### Clean up ###
+dat$specific_conductivity_transect <- as.numeric(dat$specific_conductivity_transect)
+
+#####----- Export -----#####
+write.csv(dat, "Eelgrass_and_Grazer_Data_2017.csv", row.names = FALSE)
 ```
 
