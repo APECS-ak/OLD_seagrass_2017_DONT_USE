@@ -8,16 +8,16 @@ editor_options:
 ---
 
 ```{r Libraries, echo = FALSE, include=FALSE}
-library(dplyr)
-library(ggplot2)
+library(dplyr); library(ggplot2)
 ```
 
 
 # Data cleaning and preparation
-Below is are the steps and rational for cleaning and prepping raw data so that it is ready for analysis. Data are from the 2017 field season sampling eelgrass sites on Prince of Wales Island Alaska.
+Below are the steps and rational for cleaning and prepping raw data so that it is ready for analysis. 
+Data are from the 2017 field season sampling eelgrass sites on Prince of Wales Island Alaska.
 
 ## Raw Data
-Raw data include data collected in the field on the eelgrass transect (eg.tran), data collected from processing eelgrass samples collected in the field (eg.bio). This can be thought of as the eelgrass biometrics. And finaly site level data such as date, site name, temperature, salinity, etc (eg.site).
+Raw data include data collected in the field on the eelgrass transect (eg.tran), data collected from processing eelgrass samples collected in the field (eg. bio). This can be thought of as the eelgrass biometrics. And finally site level data such as date, site name, temperature, salinity, etc (eg.site).
 
 ```{r import data, echo = FALSE, include = FALSE}
 # Eelgrass Transect
