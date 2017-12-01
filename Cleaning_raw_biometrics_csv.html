@@ -221,8 +221,8 @@ str(eg.bio)</code></pre>
 eg.bio$quadrat &lt;- as.factor(eg.bio$quadrat)
 eg.bio$plant &lt;- as.factor(eg.bio$plant)</code></pre>
 </div>
-<div id="cleaning-for-analysis" class="section level1">
-<h1>Cleaning for analysis</h1>
+<div id="cleaning-data-for-analysis" class="section level1">
+<h1>Cleaning Data for Analysis</h1>
 <p>Calculate dry weights of all flora and fauna; remove pad + foil data uneccessary for analysis</p>
 <pre class="r"><code># datachunk creator: TAS
 
@@ -376,7 +376,7 @@ colnames(eg.bio)</code></pre>
 
 
 # mean height of all blades
-eg.bio = mutate(eg.bio, mean_canopy_height = rowMeans(select(eg.bio, starts_with(&quot;leaf_length&quot;)), na.rm = TRUE))
+eg.bio = mutate(eg.bio, mean_leaf_length = rowMeans(select(eg.bio, starts_with(&quot;leaf_length&quot;)), na.rm = TRUE))
 
 # check new column names
 colnames(eg.bio)</code></pre>
@@ -404,7 +404,7 @@ colnames(eg.bio)</code></pre>
 ## [64] &quot;leaf_area3&quot;         &quot;leaf_area4&quot;         &quot;leaf_area5&quot;        
 ## [67] &quot;leaf_area6&quot;         &quot;leaf_area7&quot;         &quot;leaf_area8&quot;        
 ## [70] &quot;leaf_area9&quot;         &quot;leaf_area10&quot;        &quot;tot_leaf_area&quot;     
-## [73] &quot;mean_canopy_height&quot;</code></pre>
+## [73] &quot;mean_leaf_length&quot;</code></pre>
 <p>Determine max canopy height per plant (only tallest blade from each plant included)</p>
 <pre class="r"><code># datachunk creator: TAS
 
@@ -435,7 +435,15 @@ colnames(eg.bio)</code></pre>
 ## [64] &quot;leaf_area3&quot;         &quot;leaf_area4&quot;         &quot;leaf_area5&quot;        
 ## [67] &quot;leaf_area6&quot;         &quot;leaf_area7&quot;         &quot;leaf_area8&quot;        
 ## [70] &quot;leaf_area9&quot;         &quot;leaf_area10&quot;        &quot;tot_leaf_area&quot;     
-## [73] &quot;mean_canopy_height&quot; &quot;max_canopy_height&quot;</code></pre>
+## [73] &quot;mean_leaf_length&quot;   &quot;max_canopy_height&quot;</code></pre>
+<pre class="r"><code>#write.csv(eg.bio,'CLEAN_seagrass_biometrics_2017.csv')</code></pre>
+</div>
+<div id="to-do" class="section level1">
+<h1>TO DO:</h1>
+<ul>
+<li>Fill absent grazers with 0s so that cacluations below will work (insert this code before the mass_dw calculations)</li>
+<li>eg.bio[,89:94][is.na(eg.bio[,89:94])] &lt;- 0</li>
+</ul>
 </div>
 
 
