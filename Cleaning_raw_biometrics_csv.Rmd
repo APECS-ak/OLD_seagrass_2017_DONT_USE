@@ -131,7 +131,7 @@ colnames(eg.bio)
 ```
 
 ```{r}
-write.csv(eg.bio,'CLEAN_seagrass_biometrics_2017.csv')
+#write.csv(eg.bio,'CLEAN_seagrass_biometrics_2017.csv')
 ```
 
 
