@@ -24,12 +24,10 @@ Raw data include data collected in the field on the eelgrass transect (eg.tran),
 # seagrass transect
 eg.tran <- read.csv("https://raw.githubusercontent.com/APECS-ak/seagrass_2017/master/RAW_seagrass_transect_2017.csv", stringsAsFactors = FALSE, header = TRUE)
 
-# seagrass biometrics (lab data)
-eg.bio <- read.csv("https://raw.githubusercontent.com/APECS-ak/seagrass_2017/master/RAW_seagrass_biometrics_2017.csv", stringsAsFactors = FALSE, header = TRUE)
-
 # seagrass site
 eg.site <- read.csv("https://raw.githubusercontent.com/APECS-ak/seagrass_2017/master/RAW_seagrass_site_2017.csv", stringsAsFactors = FALSE, header = TRUE)
 ```
+
 
 Here are our data.
 Eelgrass Transect
@@ -40,13 +38,6 @@ Eelgrass Transect
 str(eg.tran)
 ```
 
-Eelgrass biometrics - the lab data
-```{r str eg.bio, echo=FALSE}
-# datachunk creator: WR
-
-
-str(eg.bio)
-```
 
 Eelgrass Site
 ```{r str eg.site, echo=FALSE}
@@ -78,8 +69,6 @@ If a grazer column has a count but has NA for foil weights then we will fill in 
 
 # Data Exploration, Initial Prep, and Summaries
 ### Originally created 10.19.2017; Wendel Raymond
-### Collaborating modifications after github import on 30 Nov 2017; Tiff Stephens
-
 
 
 Checking the data
@@ -98,13 +87,6 @@ range(eg.tran$eelgrass_shoots_0.25msq)
 hist(eg.tran$eelgrass_shoots_0.25msq)
 hist(eg.tran$macroalgae_cover_0.25msq)
 hist(eg.tran$diatom_cover_0.25msq)
-
-### Eelgrass Biometrics ###
-str(eg.bio)
-range(eg.bio$rhi_length, na.rm = TRUE)
-range(eg.bio$node1, na.rm = TRUE)
-hist(eg.bio$node2)
-hist(eg.bio$leaf_width1)
 ```
 
 
@@ -112,10 +94,6 @@ Changing numerics to factors
 ```{r}
 # datachunk creator: WR
 
-
-## Biometrics ##
-eg.bio$quadrat <- as.factor(eg.bio$quadrat)
-eg.bio$plant <- as.factor(eg.bio$plant)
 
 ## Transect ##
 eg.tran$quadrat <- as.factor(eg.tran$quadrat)
@@ -140,113 +118,9 @@ colnames(eg.tran)[7] <- "transect_end_time"
 
 
 
-# Cleaning biometrics data for analysis
-
-Calculate dry weights of all flora and fauna; remove pad + foil data uneccessary for analysis
-```{r}
-# datachunk creator: TAS
-
-
-# piped calculations for all
-eg.bio = eg.bio %>% 
-  mutate(epiphyte_mass_dw = pad_epiphyte_mass_g - pad_mass_g) %>%
-  mutate(rhi_mass_dw = rhi_foil_dw_g - rhi_foil) %>%
-  mutate(shoot_mass_dw = shoot_foil_dw - shoot_foil) %>%
-  mutate(xs_shoot_mass_dw = xs_shoot_foil_dw - xs_shoot_foil) %>%
-  mutate(xs_pad_mass_dw = xs_epiphyte_pad_mass_g - xs_pad_mass_g) %>%
-  mutate(iso_mass_dw = iso_foil_dw - iso_foil) %>%
-  mutate(gamm_amph_mass_dw = gamm_amph_foil_dw - gamm_amph_foil) %>%
-  mutate(caprel_mass_dw = caprel_foil_dw - caprel_foil) %>%
-  mutate(limpet_mass_dw = limpet_foil_dw - limpet_foil) %>%
-  mutate(gastropod_mass_dw = gastropod_foil_dw - gastropod_foil) %>%
-  mutate(crab_mass_dw = crab_foil_dw - crab_foil) 
-
-# check new column names
-colnames(eg.bio)
-
-# remove pad and foil weights from dataframe 
-eg.bio = eg.bio %>% 
-  select(-pad_epiphyte_mass_g, -pad_mass_g, -xs_epiphyte_pad_mass_g, -xs_pad_mass_g) %>% #pads
-  select(-rhi_foil_dw_g, -rhi_foil, -shoot_foil, -shoot_foil_dw, -xs_shoot_foil_dw, -xs_shoot_foil) %>% #seagrass
-  select(-iso_foil_dw, -iso_foil, -gamm_amph_foil_dw, -gamm_amph_foil, -caprel_foil_dw, -caprel_foil, -crab_foil_dw, -crab_foil) %>% #crustaceans
-  select(-limpet_foil_dw, -limpet_foil, -gastropod_foil_dw, -gastropod_foil) #molluscs
-
-# check new column names
-colnames(eg.bio)
-```
-
-
-Calculate blade areas for each blade measured
-```{r, echo=FALSE}
-# datachunk creator: TAS
-
-
-# calculate the leaf area (cm^2) per blade per plant
-eg.bio = eg.bio %>% 
-  mutate((leaf_area1 = leaf_length1 * leaf_width1, na.rm = TRUE)
-         (leaf_area2 = leaf_length2 * leaf_width2, na.rm = TRUE)
-         (leaf_area3 = leaf_length3 * leaf_width3, na.rm = TRUE)
-         (leaf_area4 = leaf_length4 * leaf_width4, na.rm = TRUE)
-         (leaf_area5 = leaf_length5 * leaf_width5, na.rm = TRUE)
-         (leaf_area6 = leaf_length6 * leaf_width6, na.rm = TRUE)
-         (leaf_area7 = leaf_length7 * leaf_width7, na.rm = TRUE)
-         (leaf_area8 = leaf_length8 * leaf_width8, na.rm = TRUE)
-         (leaf_area9 = leaf_length9 * leaf_width9, na.rm = TRUE)
-         (leaf_area10 = leaf_length10 * leaf_width10, na.rm = TRUE)
-
-# check new column names
-colnames(eg.bio)
-```
-
-Calculate total leaf area for each plant
-```{r}
-# datachunk creator: TAS
-
-
-# calculate total leaf area per plant (there is no biomass data per blade so need to combine all blades)
-eg.bio$tot_leaf_area <- rowSums(eg.bio[,c("leaf_area1", "leaf_area2", "leaf_area3", "leaf_area4", "leaf_area5", "leaf_area6", "leaf_area7", "leaf_area8", "leaf_area9", "leaf_area10")], na.rm = TRUE)
-
-# check new column names
-colnames(eg.bio)
-```
-
-Calculate mean max canopy height, and mean canopy
-```{r}
-# datachunk creator: TAS
-
-
-# mean height of all blades by row
-eg.bio = mutate(eg.bio, mean_canopy_height = rowMeans(select(eg.bio, starts_with("leaf_length")), na.rm = TRUE))
-
-# check new column names
-colnames(eg.bio)
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 Cleaning up dates
-# Disabled, effort not working
+
+# MOST OF THE CODE BELOW GOES BEYOND TYPICAL CLEANING OF DATASET! 
 ```{r}
 
 #####----- Calculations -----#####
