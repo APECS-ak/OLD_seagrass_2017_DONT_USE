@@ -21,6 +21,10 @@ Data are from the 2017 field season sampling eelgrass sites on Prince of Wales I
 Raw data include data collected in the field on the eelgrass transect (eg.tran), data collected from processing eelgrass samples collected in the field (eg. bio). This can be thought of as the eelgrass biometrics. And finally site level data such as date, site name, temperature, salinity, etc (eg.site).
 
 ```{r import data, cache = TRUE, echo = FALSE, include = FALSE}
+# seagrass biometrics
+eg.bio <- read.csv("RAW_seagrass_biometrics_2017.csv", stringsAsFactors = FALSE, header = TRUE)
+colnames(eg.bio)[1] <- "site" # for some reason the sie column has a weird name
+
 # seagrass transect
 eg.tran <- read.csv("https://raw.githubusercontent.com/APECS-ak/seagrass_2017/master/RAW_seagrass_transect_2017.csv", stringsAsFactors = FALSE, header = TRUE)
 
@@ -30,11 +34,16 @@ eg.site <- read.csv("https://raw.githubusercontent.com/APECS-ak/seagrass_2017/ma
 
 
 Here are our data.
+Eeglrass biometrics
+```{r str eg.bio, echo = FASLE}
+str(eg.bio)
+```
+
+
+
 Eelgrass Transect
 ```{r str eg.tran, echo=FALSE}
 # datachunk creator: WR
-
-
 str(eg.tran)
 ```
 
@@ -42,8 +51,6 @@ str(eg.tran)
 Eelgrass Site
 ```{r str eg.site, echo=FALSE}
 # datachunk creator: WR
-
-
 str(eg.site)
 ```
 
@@ -51,31 +58,31 @@ str(eg.site)
 ## Cleaning missing values
 A few times when processing samples either a grazer was lost or the grazer was so small that it did not register a mass on the scale. In these instances we want to still account for the animal but we need to fill in a value for the foil masses. 
 
-If a grazer column has a count but has NA for foil weights then we will fill in dummy values for the foil masses so that the grazer mass is equal to 0.0001 grams, the smalles amount measurable by the scale
-# This is disabled for now, code not functional
-```{r}
-# datachunk creator: WR
+If a grazer column has a count but has NA for foil weights then we will fill in dummy values for the foil masses so that the grazer mass is equal to 0.0001 grams, the smalles amount measurable by the scale. This does not have to be the way we do this. This is just one way.
+```{r filling missing values}
+### this still does not work but I am working on it - WR ###
 
-####### Wendel, this code doesn't seem to work. Not sure where "plant" is derived from in line 57. #####
+for(s in c("2017_H_03", "2017_H_04", "2017_L_02", "2017_L_03", "2017_L07"))
+miss.dat <- eg.bio %>% 
+  filter(plant == 1) %>% # row that holds all grazer data
+  filter(site == "2017_H_03" & quadrat == 5)
 
-#if(eg.bio$plant == 1 && eg.bio$iso_count > 0 | eg.bio$gamm_amph_count > 0| eg.bio$caprel_count > 0 | eg.bio$limpet_count > 0 | eg.bio$gastropod_count > 0 | eg.bio$crab_count > 0 && is.na(eg.bio$iso_fw) | is.na(eg.bio$gamm_amph_fw) | is.na(eg.bio$caprel_fw) | is.na(eg.bio$limpet_fw) | is.na(eg.bio$gastropod_fw) | is.na(eg.bio$crab_fw))
-#{
-   #Code to execute
-#}
-  
+miss.dat$gastropod_foil <- 0.0001
+miss.dat$gastropod_foil_dw <- 0.0002
+
+eg.bio <- eg.bio %>% 
+  anti_join(miss.dat, by = c("site", "plant", "quadrat")) %>% 
+  bind_rows(miss.dat) %>% 
+  arrange(site, quadrat, plant)
+
 ```
-
-
 
 # Data Exploration, Initial Prep, and Summaries
 ### Originally created 10.19.2017; Wendel Raymond
 
-
 Checking the data
-```{r}
+```{r checking data}
 # datachunk creator: WR
-
-
 ### Eelgrass Transect ###
 str(eg.tran)
 levels(eg.tran$site)
@@ -91,17 +98,14 @@ hist(eg.tran$diatom_cover_0.25msq)
 
 
 Changing numerics to factors
-```{r}
+```{r number to factors}
 # datachunk creator: WR
-
-
 ## Transect ##
 eg.tran$quadrat <- as.factor(eg.tran$quadrat)
 ```
 
-
 Changing a few column names so its not confusing ###
-```{r}
+```{r changing column names}
 # datachunk creator: WR
 
 
@@ -116,18 +120,12 @@ colnames(eg.tran)[7] <- "transect_end_time"
 
 ```
 
-
-
 Cleaning up dates
 
 # MOST OF THE CODE BELOW GOES BEYOND TYPICAL CLEANING OF DATASET! 
 ```{r}
 
 #####----- Calculations -----#####
-
-
-
-
 ## Fill absent grazers with 0s so that cacluations below will work ##
 eg.bio[,89:94][is.na(eg.bio[,89:94])] <- 0
 
