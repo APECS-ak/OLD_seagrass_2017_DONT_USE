@@ -123,7 +123,7 @@ colnames(eg.tran)[7] <- "transect_end_time"
 Cleaning up dates
 
 # MOST OF THE CODE BELOW GOES BEYOND TYPICAL CLEANING OF DATASET! 
-```{r}
+```{r Calculations}
 
 #####----- Calculations -----#####
 ## Fill absent grazers with 0s so that cacluations below will work ##
